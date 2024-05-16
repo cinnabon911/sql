@@ -1,7 +1,9 @@
 -- AGGREGATE
 /* 1. Write a query that determines how many times each vendor has rented a booth 
 at the farmer’s market by counting the vendor booth assignments per vendor_id. */
-
+SELECT vendor_id, count(*) as booth_rental
+FROM vendor_booth_assignments
+GROUP by 1
 
 
 /* 2. The Farmer’s Market Customer Appreciation Committee wants to give a bumper 
@@ -9,7 +11,12 @@ sticker to everyone who has ever spent more than $2000 at the market. Write a qu
 of customers for them to give stickers to, sorted by last name, then first name. 
 
 HINT: This query requires you to join two tables, use an aggregate function, and use the HAVING keyword. */
-
+SELECT concat(customer_first_name, " ", customer_last_name) as customer_full_name, sum(quantity*cost_to_customer_per_qty) as sales
+FROM customer_purchases cp left JOIN customer c
+on cp.customer_id = c.customer_id
+GROUP by 1
+HAVING sales >= 2000
+ORDER by customer_last_name, customer_first_name
 
 
 --Temp Table
@@ -23,7 +30,10 @@ When inserting the new vendor, you need to appropriately align the columns to be
 -> To insert the new row use VALUES, specifying the value you want for each column:
 VALUES(col1,col2,col3,col4,col5) 
 */
-
+CREATE TABLE TEMP.new_vendor 
+as SELECT * FROM vendor;
+INSERT INTO new_vendor (vendor_id, vendor_name, vendor_type, vendor_owner_first_name, vendor_owner_last_name)
+VALUES(10, "Thomass Superfood Store", "Fresh Focused","Thomas", "Rosenthal");
 
 
 -- Date
@@ -31,10 +41,16 @@ VALUES(col1,col2,col3,col4,col5)
 
 HINT: you might need to search for strfrtime modifers sqlite on the web to know what the modifers for month 
 and year are! */
-
+SELECT customer_id, strftime('%m',market_date) as month, strftime('%Y', market_date) as year
+FROM customer_purchases
 /* 2. Using the previous query as a base, determine how much money each customer spent in April 2019. 
 Remember that money spent is quantity*cost_to_customer_per_qty. 
 
 HINTS: you will need to AGGREGATE, GROUP BY, and filter...
 but remember, STRFTIME returns a STRING for your WHERE statement!! */
 
+SELECT customer_id, sum(quantity*cost_to_customer_per_qty) as sales, strftime('%m',market_date) as month, strftime('%Y', market_date) as year
+FROM customer_purchases
+WHERE year = '2019' and month = '04'
+GROUP by 1, 3, 4
+ORDER by sales DESC
