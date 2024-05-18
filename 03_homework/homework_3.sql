@@ -12,7 +12,7 @@ of customers for them to give stickers to, sorted by last name, then first name.
 
 HINT: This query requires you to join two tables, use an aggregate function, and use the HAVING keyword. */
 SELECT concat(customer_first_name, " ", customer_last_name) as customer_full_name, sum(quantity*cost_to_customer_per_qty) as sales
-FROM customer_purchases cp left JOIN customer c
+FROM customer_purchases as cp left JOIN customer as c
 on cp.customer_id = c.customer_id
 GROUP by 1
 HAVING sales >= 2000
