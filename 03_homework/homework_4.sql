@@ -49,3 +49,48 @@ customer_purchases table that indicates how many different times that customer h
 SELECT *, count(product_id) OVER(PARTITION by customer_id, product_id) as total_purchase_count
 FROM customer_purchases
 ORDER by customer_id, product_id
+
+-- String manipulations
+/* 1. Some product names in the product table have descriptions like "Jar" or "Organic". 
+These are separated from the product name with a hyphen. 
+Create a column using SUBSTR (and a couple of other commands) that captures these, but is otherwise NULL. 
+Remove any trailing or leading whitespaces. Don't just use a case statement for each product! 
+
+| product_name               | description |
+|----------------------------|-------------|
+| Habanero Peppers - Organic | Organic     |
+
+Hint: you might need to use INSTR(product_name,'-') to find the hyphens. INSTR will help split the column. */
+SELECT CASE WHEN instr(product_name, '-') = 0 THEN NULL ELSE trim(substr(product_name, instr(product_name, '-')+1)) END as product_desc, product_name 
+from product
+
+
+/* 2. Filter the query to show any product_size value that contain a number with REGEXP. */
+SELECT product_size, CASE WHEN instr(product_name, '-') = 0 THEN NULL ELSE trim(substr(product_name, instr(product_name, '-')+1)) END as product_desc, product_name 
+from product
+WHERE product_size REGEXP '[0-9]'
+
+
+-- UNION
+/* 1. Using a UNION, write a query that displays the market dates with the highest and lowest total sales.
+
+HINT: There are a possibly a few ways to do this query, but if you're struggling, try the following: 
+1) Create a CTE/Temp Table to find sales values grouped dates; 
+2) Create another CTE/Temp table with a rank windowed function on the previous query to create 
+"best day" and "worst day"; 
+3) Query the second temp table twice, once for the best day, once for the worst day, 
+with a UNION binding them. */
+select * from (SELECT market_date, sales, rank() OVER(order by sub.sales DESC) as rank_by_sales
+from 
+(SELECT sum(quantity*cost_to_customer_per_qty) as sales, market_date
+from customer_purchases
+group by market_date) sub
+LIMIT 1) as best_sales
+UNION  
+SELECT * from (SELECT market_date, sales, rank() OVER(order by sub.sales DESC) as rank_by_sales
+from 
+(SELECT sum(quantity*cost_to_customer_per_qty) as sales, market_date
+from customer_purchases
+group by market_date) sub
+ORDER by rank_by_sales DESC
+LIMIT 1) as worst_sales
