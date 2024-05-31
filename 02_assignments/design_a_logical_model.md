@@ -15,15 +15,38 @@ _Hint, search type 1 vs type 2 slowly changing dimensions._
 
 Bonus: Are there privacy implications to this, why or why not?
 ```
-Your answer...
-```
+Type 1 is a method where new data gets overwritten with old data, and therefore does not track historical data. If we adopt Type 1 method, we won't be able to retrieve a customer's previous adresses once the customer provides a new address. A table design consistent with Type 1 is as follows
+
+[CustomerAddress]
+CustomerID (Foreign Key)
+Address
+City
+State
+ZipCode
+Country
+
+ Type 2 is a method used to track historical data, where a new row is inserted into the table for each customer's new address.
+
+[CustomerAddress]
+AddressID (Primary Key)
+CustomerID (Foreign Key)
+Address
+City
+State
+ZipCode
+Country
+StartDate
+EndDate (nullable, null if the address is current)
 
 ## Question 4
 Review the AdventureWorks Schema [here](https://i.stack.imgur.com/LMu4W.gif)
 
 Highlight at least two differences between it and your ERD. Would you change anything in yours?
 ```
-Your answer...
+1. The AdventureWorks ERD has different schemas that are designed around real world entity (departments), e.g. sales, human resources
+2. There is a rowguid field in certain tables in AdventureWorks, i.e. SalesPerson, SalesTaxRate, which serves as the unique identifier
+
+For my customer table, I would add fields - modified date and account number - that are used in the AdventureWorks table. Reason being customers' deatils could change, e.g. phone number, address, so modified date helps us identify the time these changes are made. Account number is realistic in today's world since most shops have an e commerce website that requires the customers to make an account.
 ```
 
 # Criteria
